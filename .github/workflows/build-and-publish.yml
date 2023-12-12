@@ -13,12 +13,13 @@ jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./src
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Change to src directory
-        run: cd src/
 
       - name: Set VERSION variable from tag
         run: |
