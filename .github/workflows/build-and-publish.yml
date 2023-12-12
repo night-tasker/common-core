@@ -1,0 +1,32 @@
+name: build-and-publish
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set VERSION variable from tag
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+      - name: Build
+        run: dotnet build NightTasker.Common.Core.sln --configuration Release /p:Version=${{ env.VERSION }} -p:PackageID=NightTasker.Common.Core
+      - name: Test
+        run: dotnet test NightTasker.Common.Core.sln --configuration Release /p:Version=${{ env.VERSION }} -p:PackageID=NightTasker.Common.Core --no-build
+      - name: Pack
+        run: dotnet pack NightTasker.Common.Core.sln --configuration Release /p:Version=${{ env.VERSION }} -p:PackageID=NightTasker.Common.Core --no-build --output ./nuget-packages
+      - name: Push
+        run: |
+          for file in $(find ./nuget-packages -type f -name "*.nupkg"); do
+            dotnet nuget push "$file" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
