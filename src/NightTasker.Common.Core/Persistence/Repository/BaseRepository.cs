@@ -6,7 +6,7 @@ using NightTasker.Common.Core.Abstractions;
 namespace NightTasker.Common.Core.Persistence.Repository;
 
 /// <inheritdoc cref="IRepository{TEntity,TKey}"/>
-internal abstract class BaseRepository<TEntity, TKey, TDbContext>(TDbContext context) : IRepository<TEntity, TKey>
+public abstract class BaseRepository<TEntity, TKey, TDbContext>(TDbContext context) : IRepository<TEntity, TKey>
     where TEntity : class, IEntity where TDbContext : DbContext
 {
     /// <summary>
