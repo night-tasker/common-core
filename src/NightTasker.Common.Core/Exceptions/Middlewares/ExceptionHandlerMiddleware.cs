@@ -43,7 +43,10 @@ public class ExceptionHandlerMiddleware(
         errorDetails.Message = ErrorDetails.DefaultErrorMessage;
         errorDetails.DisplayMessage = ResolveDisplayMessage(exception);
 
-        var jsonStringErrorDetails = JsonSerializer.Serialize(errorDetails);
+        var jsonStringErrorDetails = JsonSerializer.Serialize(errorDetails, new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
         
         return context.Response.WriteAsync(jsonStringErrorDetails);
     }
