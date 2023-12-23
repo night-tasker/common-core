@@ -6,18 +6,13 @@ using NightTasker.Common.Core.Abstractions;
 namespace NightTasker.Common.Core.Persistence.Repository;
 
 /// <inheritdoc cref="IRepository{TEntity,TKey}"/>
-public abstract class BaseRepository<TEntity, TKey, TDbContext>(TDbContext context) : IRepository<TEntity, TKey>
-    where TEntity : class, IEntity where TDbContext : DbContext
+public abstract class BaseRepository<TEntity, TKey>(DbSet<TEntity> entities) : IRepository<TEntity, TKey>
+    where TEntity : class, IEntity
 {
     /// <summary>
     /// Записи определённой сущности.
     /// </summary>
-    private DbSet<TEntity> Entities { get; init; } = context.Set<TEntity>();
-
-    /// <summary>
-    /// Таблица записей определённой сущности.
-    /// </summary>
-    public virtual IQueryable<TEntity> Table => Entities;
+    public DbSet<TEntity> Entities { get; init; } = entities;
 
     /// <summary>
     /// Неотслеживаемая таблица определённой сущности.

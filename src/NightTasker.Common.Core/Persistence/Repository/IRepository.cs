@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace NightTasker.Common.Core.Persistence.Repository;
@@ -8,12 +9,12 @@ namespace NightTasker.Common.Core.Persistence.Repository;
 /// </summary>
 /// <typeparam name="TEntity">Тип сущности.</typeparam>
 /// <typeparam name="TKey">Тип ключа сущности.</typeparam>
-public interface IRepository<TEntity, TKey>
+public interface IRepository<TEntity, TKey> where TEntity : class
 {
     /// <summary>
     /// Таблица записей определённой сущности.
     /// </summary>
-    IQueryable<TEntity> Table { get; }
+    DbSet<TEntity> Entities { get; }
     
     /// <summary>
     /// Неотслеживаемая таблица определённой сущности.
