@@ -8,5 +8,5 @@ public interface IUpdatedDateTimeOffset
     /// <summary>
     /// Дата и время обновления.
     /// </summary>
-    DateTimeOffset UpdatedDateTimeOffset { get; set; }
+    DateTimeOffset? UpdatedDateTimeOffset { get; set; }
 }
