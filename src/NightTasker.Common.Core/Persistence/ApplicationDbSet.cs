@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace NightTasker.Common.Core.Persistence;
 
@@ -10,20 +8,20 @@ namespace NightTasker.Common.Core.Persistence;
 /// <param name="dbContext">Контекст для работы с данными.</param>
 /// <typeparam name="TEntity">Тип сущности записей.</typeparam>
 /// <typeparam name="TKey">Тип ключа сущностей записей.</typeparam>
-public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
+public class ApplicationDbSet<TEntity, TKey>(
+    DbContext dbContext, 
+    IQueryable<TEntity>? entities = null)
     where TEntity : class
 {
-    private readonly DbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    
     /// <summary>
-    /// Набор записей.
+    /// Контекст для работы с данными.
     /// </summary>
-    private DbSet<TEntity> DbSet => _dbContext.Set<TEntity>();
+    private readonly DbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     /// <summary>
     /// Таблица записей определённой сущности. 
     /// </summary>
-    public IQueryable<TEntity> Entities => _dbContext.Set<TEntity>();
+    public IQueryable<TEntity> Entities => entities ?? _dbContext.Set<TEntity>();
     
     /// <summary>
     /// Добавить новую запись.
@@ -32,7 +30,7 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="cancellationToken">Токен отмены.</param>
     public async Task Add(TEntity entity, CancellationToken cancellationToken)
     { 
-        await DbSet.AddAsync(entity, cancellationToken);
+        await _dbContext.AddAsync(entity, cancellationToken);
     }
 
     /// <summary>
@@ -42,7 +40,7 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="cancellationToken">Токен отмены.</param>
     public Task AddRange(IReadOnlyCollection<TEntity> entities, CancellationToken cancellationToken)
     {
-        return DbSet.AddRangeAsync(entities, cancellationToken);
+        return _dbContext.AddRangeAsync(entities, cancellationToken);
     }
     
     /// <summary>
@@ -51,7 +49,7 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="entity">Запись.</param>
     public void Update(TEntity entity)
     {
-        DbSet.Update(entity);
+        _dbContext.Update(entity);
     }
     
     /// <summary>
@@ -60,19 +58,7 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="entities">Записи.</param>
     public void UpdateRange(IReadOnlyCollection<TEntity> entities)
     {
-        DbSet.UpdateRange(entities);
-    }
-    
-    /// <summary>
-    /// Обновить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="updateExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    public Task<int> UpdateByExpression(
-        Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateExpression, 
-        CancellationToken cancellationToken)
-    {
-        return DbSet.ExecuteUpdateAsync(updateExpression, cancellationToken);
+        _dbContext.UpdateRange(entities);
     }
 
     /// <summary>
@@ -81,7 +67,7 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="entity">Запись.</param>
     public void Delete(TEntity entity)
     {
-        DbSet.Remove(entity);
+        _dbContext.Remove(entity);
     }
     
     /// <summary>
@@ -90,29 +76,6 @@ public class ApplicationDbSet<TEntity, TKey>(DbContext dbContext)
     /// <param name="entities">Записи.</param>
     public void DeleteRange(IReadOnlyCollection<TEntity> entities)
     {
-        DbSet.RemoveRange(entities);
-    }
-
-    /// <summary>
-    /// Удалить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="deleteExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    public Task<int> DeleteByExpression(
-        Expression<Func<TEntity, bool>> deleteExpression,
-        CancellationToken cancellationToken)
-    {
-        return DbSet.Where(deleteExpression).ExecuteDeleteAsync(cancellationToken);
-    }
-    
-    /// <summary>
-    /// Найти запись по ключу.
-    /// </summary>
-    /// <param name="key">Ключ.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <returns>Запись.</returns>
-    public ValueTask<TEntity?> FindAsync(TKey key, CancellationToken cancellationToken)
-    {
-        return DbSet.FindAsync(key, cancellationToken);
+        _dbContext.RemoveRange(entities);
     }
 }

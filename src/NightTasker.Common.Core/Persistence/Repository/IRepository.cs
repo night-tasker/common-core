@@ -14,14 +14,6 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     /// Таблица записей определённой сущности.
     /// </summary>
     IQueryable<TEntity> Entities { get; }
-    
-    /// <summary>
-    /// Попробовать получить запись по ИД.
-    /// </summary>
-    /// <param name="entityId">ИД.</param>
-    /// <param name="cancellationToken">Токен.</param>
-    /// <returns>Запись.</returns>
-    Task<TEntity?> TryGetById(TKey entityId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Получить все записи.
@@ -57,15 +49,6 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     void UpdateRange(IReadOnlyCollection<TEntity> entities);
 
     /// <summary>
-    /// Обновить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="updateExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    Task UpdateByExpression(
-        Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateExpression,
-        CancellationToken cancellationToken);
-
-    /// <summary>
     /// Удалить запись.
     /// </summary>
     /// <param name="entity">Запись.</param>
@@ -76,13 +59,4 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     /// </summary>
     /// <param name="entities">Записи.</param>
     void DeleteRange(IReadOnlyCollection<TEntity> entities);
-    
-    /// <summary>
-    /// Удалить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="deleteExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    Task DeleteByExpression(
-        Expression<Func<TEntity, bool>> deleteExpression,
-        CancellationToken cancellationToken);
 }

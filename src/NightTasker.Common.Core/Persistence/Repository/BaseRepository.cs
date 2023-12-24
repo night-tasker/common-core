@@ -6,22 +6,18 @@ using NightTasker.Common.Core.Abstractions;
 namespace NightTasker.Common.Core.Persistence.Repository;
 
 /// <inheritdoc cref="IRepository{TEntity,TKey}"/>
-public abstract class BaseRepository<TEntity, TKey>(DbContext dbContext) : IRepository<TEntity, TKey>
+public abstract class BaseRepository<TEntity, TKey>(
+    DbContext dbContext,
+    IQueryable<TEntity>? entities = null) : IRepository<TEntity, TKey>
     where TEntity : class, IEntity
 {
     /// <summary>
     /// Набор записей.
     /// </summary>
-    private readonly ApplicationDbSet<TEntity, TKey> _dbSet = new(dbContext);
+    private readonly ApplicationDbSet<TEntity, TKey> _dbSet = new(dbContext, entities);
     
     /// <inheritdoc />
     public IQueryable<TEntity> Entities => _dbSet.Entities;
-    
-    /// <inheritdoc />
-    public async Task<TEntity?> TryGetById(TKey entityId, CancellationToken cancellationToken)
-    {
-        return await _dbSet.FindAsync(entityId, cancellationToken);
-    }
 
     /// <inheritdoc />
     public virtual Task<List<TEntity>> GetAll(CancellationToken cancellationToken)
@@ -52,14 +48,6 @@ public abstract class BaseRepository<TEntity, TKey>(DbContext dbContext) : IRepo
     {
         _dbSet.UpdateRange(entities);
     }
-
-    /// <inheritdoc />
-    public virtual Task UpdateByExpression(
-        Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateExpression, 
-        CancellationToken cancellationToken)
-    {
-        return _dbSet.UpdateByExpression(updateExpression, cancellationToken);
-    }
     
     /// <inheritdoc />
     public void Delete(TEntity entity)
@@ -71,13 +59,5 @@ public abstract class BaseRepository<TEntity, TKey>(DbContext dbContext) : IRepo
     public void DeleteRange(IReadOnlyCollection<TEntity> entities)
     {
         _dbSet.DeleteRange(entities);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task DeleteByExpression(
-        Expression<Func<TEntity, bool>> deleteExpression,
-        CancellationToken cancellationToken)
-    {
-        await _dbSet.DeleteByExpression(deleteExpression, cancellationToken);
     }
 }
