@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace NightTasker.Common.Core.Persistence.Repository;
@@ -14,12 +13,7 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     /// <summary>
     /// Таблица записей определённой сущности.
     /// </summary>
-    DbSet<TEntity> Entities { get; }
-    
-    /// <summary>
-    /// Неотслеживаемая таблица определённой сущности.
-    /// </summary>
-    IQueryable<TEntity> NoTrackingTable { get; }
+    IQueryable<TEntity> Entities { get; }
     
     /// <summary>
     /// Попробовать получить запись по ИД.
@@ -44,6 +38,25 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     Task Add(TEntity entity, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Добавить новые записи.
+    /// </summary>
+    /// <param name="entities">Записи.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    Task AddRange(IReadOnlyCollection<TEntity> entities, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Обновить запись.
+    /// </summary>
+    /// <param name="entity">Запись.</param>
+    void Update(TEntity entity);
+
+    /// <summary>
+    /// Обновить записи.
+    /// </summary>
+    /// <param name="entities">Записи.</param>
+    void UpdateRange(IReadOnlyCollection<TEntity> entities);
+
+    /// <summary>
     /// Обновить записи, удовлетворяющие условию.
     /// </summary>
     /// <param name="updateExpression">Условие.</param>
@@ -51,6 +64,18 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     Task UpdateByExpression(
         Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateExpression,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Удалить запись.
+    /// </summary>
+    /// <param name="entity">Запись.</param>
+    void Delete(TEntity entity);
+
+    /// <summary>
+    /// Удалить записи.
+    /// </summary>
+    /// <param name="entities">Записи.</param>
+    void DeleteRange(IReadOnlyCollection<TEntity> entities);
     
     /// <summary>
     /// Удалить записи, удовлетворяющие условию.

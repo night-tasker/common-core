@@ -6,72 +6,78 @@ using NightTasker.Common.Core.Abstractions;
 namespace NightTasker.Common.Core.Persistence.Repository;
 
 /// <inheritdoc cref="IRepository{TEntity,TKey}"/>
-public abstract class BaseRepository<TEntity, TKey>(DbSet<TEntity> entities) : IRepository<TEntity, TKey>
+public abstract class BaseRepository<TEntity, TKey>(DbContext dbContext) : IRepository<TEntity, TKey>
     where TEntity : class, IEntity
 {
     /// <summary>
-    /// Записи определённой сущности.
+    /// Набор записей.
     /// </summary>
-    public DbSet<TEntity> Entities { get; init; } = entities;
-
-    /// <summary>
-    /// Неотслеживаемая таблица определённой сущности.
-    /// </summary>
-    public virtual IQueryable<TEntity> NoTrackingTable => Entities.AsNoTrackingWithIdentityResolution();
-
-    /// <summary>
-    /// Получить все записи.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <returns>Список всех записей.</returns>
-    public virtual async Task<List<TEntity>> GetAll(CancellationToken cancellationToken)
+    private readonly ApplicationDbSet<TEntity, TKey> _dbSet = new(dbContext);
+    
+    /// <inheritdoc />
+    public IQueryable<TEntity> Entities => _dbSet.Entities;
+    
+    /// <inheritdoc />
+    public async Task<TEntity?> TryGetById(TKey entityId, CancellationToken cancellationToken)
     {
-        return await Entities.ToListAsync(cancellationToken);
+        return await _dbSet.FindAsync(entityId, cancellationToken);
     }
 
-    /// <summary>
-    /// Добавить новую запись.
-    /// </summary>
-    /// <param name="entity">Запись.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    public virtual async Task Add(TEntity entity, CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public virtual Task<List<TEntity>> GetAll(CancellationToken cancellationToken)
+    {
+        return Entities.ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task Add(TEntity entity, CancellationToken cancellationToken)
     { 
-        await Entities.AddAsync(entity, cancellationToken);
+        return _dbSet.Add(entity, cancellationToken);
+    }
+    
+    /// <inheritdoc />
+    public Task AddRange(IReadOnlyCollection<TEntity> entities, CancellationToken cancellationToken)
+    {
+        return _dbSet.AddRange(entities, cancellationToken);
+    }
+    
+    /// <inheritdoc />
+    public void Update(TEntity entity)
+    {
+        _dbSet.Update(entity);
+    }
+    
+    /// <inheritdoc />
+    public void UpdateRange(IReadOnlyCollection<TEntity> entities)
+    {
+        _dbSet.UpdateRange(entities);
     }
 
-    /// <summary>
-    /// Обновить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="updateExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    public virtual async Task UpdateByExpression(
+    /// <inheritdoc />
+    public virtual Task UpdateByExpression(
         Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateExpression, 
         CancellationToken cancellationToken)
     {
-        await Entities.ExecuteUpdateAsync(updateExpression, cancellationToken);
+        return _dbSet.UpdateByExpression(updateExpression, cancellationToken);
+    }
+    
+    /// <inheritdoc />
+    public void Delete(TEntity entity)
+    {
+        _dbSet.Delete(entity);
+    }
+    
+    /// <inheritdoc />
+    public void DeleteRange(IReadOnlyCollection<TEntity> entities)
+    {
+        _dbSet.DeleteRange(entities);
     }
 
-    /// <summary>
-    /// Удалить записи, удовлетворяющие условию.
-    /// </summary>
-    /// <param name="deleteExpression">Условие.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <inheritdoc />
     public virtual async Task DeleteByExpression(
         Expression<Func<TEntity, bool>> deleteExpression,
         CancellationToken cancellationToken)
     {
-        await Entities.Where(deleteExpression).ExecuteDeleteAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Попробовать получить запись по ИД.
-    /// </summary>
-    /// <param name="entityId">ИД.</param>
-    /// <param name="cancellationToken">Токен.</param>
-    /// <returns>Запись.</returns>
-    public async Task<TEntity?> TryGetById(TKey entityId, CancellationToken cancellationToken)
-    {
-        var entity = await Entities.FindAsync(entityId);
-        return entity;
+        await _dbSet.DeleteByExpression(deleteExpression, cancellationToken);
     }
 }
