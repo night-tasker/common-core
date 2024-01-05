@@ -10,6 +10,16 @@ public class IdentityService : IIdentityService
     public IdentityService(
         IHttpContextAccessor httpContextAccessor)
     {
+        if (httpContextAccessor is null)
+        {
+            throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+        
+        if (httpContextAccessor.HttpContext is null)
+        {
+            IsSystem = true;
+        }
+        
         if (!httpContextAccessor.HttpContext!.User.Identity!.IsAuthenticated)
         {
             return;
@@ -32,4 +42,7 @@ public class IdentityService : IIdentityService
 
     /// <inheritdoc />
     public bool IsAuthenticated { get; }
+    
+    /// <inheritdoc />
+    public bool IsSystem { get; set; }
 }

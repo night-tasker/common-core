@@ -11,7 +11,12 @@ public interface IIdentityService
     Guid? CurrentUserId { get; }
     
     /// <summary>
-    ///  Аутентифицирован ли текущий пользователь.
+    /// Аутентифицирован ли текущий пользователь.
     /// </summary>
     bool IsAuthenticated { get; }
+
+    /// <summary>
+    /// Происходит ли выполнение системой (не пользовательский запрос).
+    /// </summary>
+    public bool IsSystem { get; set; }
 }
