@@ -18,6 +18,7 @@ public class IdentityService : IIdentityService
         if (httpContextAccessor.HttpContext is null)
         {
             IsSystem = true;
+            return;
         }
         
         if (!httpContextAccessor.HttpContext!.User.Identity!.IsAuthenticated)
