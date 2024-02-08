@@ -9,5 +9,5 @@ public interface IEntityWithId<T> : IEntity
     /// <summary>
     /// ИД.
     /// </summary>
-    T Id { get; set; }
+    T Id { get; }
 }
